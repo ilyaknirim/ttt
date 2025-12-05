@@ -5,12 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Крестики-Нолики в Telegram</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Подключение Telegram Web App API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Подключение Firebase для синхронизации игры между игроками -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
 
-        // Firebase configuration (replace with your own)
+        // Конфигурация Firebase (замените на свои данные)
+        // Для получения этих данных:
+        // 1. Создайте проект в Firebase Console (https://console.firebase.google.com/)
+        // 2. Добавьте веб-приложение в проект
+        // 3. Скопируйте конфигурацию из настроек проекта
         const firebaseConfig = {
             apiKey: "your-api-key",
             authDomain: "your-project.firebaseapp.com",
@@ -21,10 +27,11 @@
             appId: "your-app-id"
         };
 
-        // Initialize Firebase
+        // Инициализация Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
+        // Сохранение экземпляров Firebase в глобальных переменных для доступа из app.js
         window.firebaseApp = app;
         window.firebaseDatabase = database;
         window.firebaseRef = ref;
@@ -33,9 +40,15 @@
     </script>
 </head>
 <body>
+    <!-- Основной контейнер приложения -->
     <div id="app">
+        <!-- Заголовок игры -->
         <h1>Крестики-Нолики</h1>
+
+        <!-- Статистика игрока -->
         <div id="stats">Побед: 0 | Поражений: 0 | Ничьих: 0</div>
+
+        <!-- Селектор размера поля (отображается при старте) -->
         <div id="sizeSelector" class="size-selector">
             <h2>Выберите размер поля</h2>
             <div class="slider-container">
@@ -48,24 +61,26 @@
             </div>
             <button id="startGameBtn">Начать игру</button>
         </div>
+
+        <!-- Контейнер с игровым полем (изначально скрыт) -->
         <div id="gameContainer" class="hidden">
+            <!-- Игровое поле - ячейки будут генерироваться динамически в JS -->
             <div id="board" class="board">
-                <div class="cell" data-index="0"></div>
-                <div class="cell" data-index="1"></div>
-                <div class="cell" data-index="2"></div>
-                <div class="cell" data-index="3"></div>
-                <div class="cell" data-index="4"></div>
-                <div class="cell" data-index="5"></div>
-                <div class="cell" data-index="6"></div>
-                <div class="cell" data-index="7"></div>
-                <div class="cell" data-index="8"></div>
+                <!-- Ячейки поля будут добавлены через JavaScript в зависимости от выбранного размера -->
             </div>
+
+            <!-- Информационное сообщение о статусе игры -->
             <div id="status">Ваш ход: X</div>
-            <button id="shareBtn">Поделиться игрой</button>
-            <button id="newGameBtn">Новая игра</button>
-        </div>
+
+            <!-- Кнопки управления игрой -->
+            <div class="game-controls">
+                <button id="shareBtn">Поделиться игрой</button>
+                <button id="newGameBtn">Новая игра</button>
+            </div>
         </div>
     </div>
+
+    <!-- Подключение основного скрипта игры -->
     <script src="app.js"></script>
 </body>
 </html>

@@ -99,6 +99,33 @@ h1 {
     overflow: hidden;
     min-width: 40px;
     min-height: 40px;
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.cell-visible {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.cell-content {
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 1.5em;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .cell::before {
@@ -129,7 +156,68 @@ h1 {
     font-weight: bold;
     color: var(--secondary-color);
     text-shadow: 0 0 5px var(--secondary-color);
-    min-height: 24px;
+    min-height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.status-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.5s ease;
+}
+
+.status-icon {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.status-text {
+    text-align: center;
+}
+
+.player-indicator {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    margin: 0 5px;
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 0 3px rgba(0,0,0,0.5);
+}
+
+.status-updating {
+    opacity: 0.5;
+    transform: scale(0.98);
+}
+
+.status-my-turn {
+    color: var(--accent-color);
+    text-shadow: 0 0 8px var(--accent-color);
+}
+
+.status-waiting {
+    color: var(--primary-color);
+    text-shadow: 0 0 8px var(--primary-color);
+}
+
+.status-win {
+    color: #00ff00;
+    text-shadow: 0 0 10px #00ff00;
+    animation: pulse 1s infinite;
+}
+
+.status-lose {
+    color: #ff4444;
+    text-shadow: 0 0 10px #ff4444;
+    animation: shake 0.5s;
 }
 
 #stats {
@@ -240,6 +328,44 @@ input[type="range"]::-moz-range-thumb {
     cursor: pointer;
     box-shadow: 0 0 10px var(--accent-color);
     border: none;
+}
+
+.game-controls {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.cell-shake {
+    animation: shake 0.5s;
+}
+
+.cell-move {
+    animation: pulse 0.5s;
+}
+
+.win-animation {
+    animation: winPulse 2s;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes winPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    25% { transform: scale(1.02); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+    75% { transform: scale(1.02); opacity: 0.8; }
 }
 
 .hidden {
