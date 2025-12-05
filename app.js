@@ -108,9 +108,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Функция для отправки состояния игры в Firebase
-    function pushGameState() {
+    // Функция для отправки состояния игры в Firebase с retry логикой
+    function pushGameState(retryCount = 0) {
         if (!gameRef) return;
+
+        const maxRetries = 3;
+        const retryDelay = 1000 * (retryCount + 1); // Экспоненциальная задержка
 
         try {
             window.firebaseSet(gameRef, {
@@ -118,10 +121,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentPlayer: currentPlayer,
                 gameActive: gameActive,
                 boardWidth: boardWidth,
-                boardHeight: boardHeight
+                boardHeight: boardHeight,
+                lastUpdate: Date.now() // Добавляем timestamp для отслеживания
+            }).then(() => {
+                // Успешно сохранено
+                console.log('Состояние игры сохранено успешно');
             }).catch(error => {
                 console.error('Ошибка при сохранении состояния игры:', error);
-                showError('Не удалось сохранить ход. Попробуйте еще раз.');
+
+                if (retryCount < maxRetries) {
+                    console.log(`Повторная попытка ${retryCount + 1}/${maxRetries} через ${retryDelay}мс`);
+                    setTimeout(() => {
+                        pushGameState(retryCount + 1);
+                    }, retryDelay);
+                } else {
+                    showError('Не удалось сохранить ход после нескольких попыток. Проверьте подключение к интернету.');
+                }
             });
         } catch (error) {
             console.error('Ошибка при отправке данных в Firebase:', error);
@@ -509,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 
-    // Поделиться игрой с улучшенной обработкой
+    // Поделиться игрой с улучшенной обработкой для Telegram
     shareBtn.addEventListener('click', () => {
         try {
             // Показываем индикатор загрузки
@@ -522,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (gameId) {
                 shareUrl.searchParams.set('gameId', gameId);
                 shareUrl.searchParams.set('player', myPlayer === 'X' ? 'O' : 'X');
-            } 
+            }
             // Для локальной игры
             else {
                 shareUrl.searchParams.set('board', board.join(''));
@@ -533,12 +548,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const url = shareUrl.href;
 
-            // Пытаемся использовать Web Share API
-            if (navigator.share) {
+            // Используем Telegram Web App API для быстрого шаринга
+            if (window.Telegram && window.Telegram.WebApp) {
+                // Создаем текст для шаринга
+                const shareText = `🎮 Давай сыграем в крестики-нолики!\n\n${url}`;
+
+                // Используем Telegram для шаринга
+                window.Telegram.WebApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('🎮 Давай сыграем в крестики-нолики!')}`);
+
+                // Показываем успех
+                statusElement.innerHTML = '<div class="status-content"><div class="status-icon">✅</div><div class="status-text">Открыт Telegram для шаринга!</div></div>';
+
+                // Возвращаем обычный статус через 2 секунды
+                setTimeout(() => {
+                    updateStatus();
+                }, 2000);
+            }
+            // Fallback на Web Share API
+            else if (navigator.share) {
                 navigator.share({
                     title: 'Крестики-Нолики',
                     text: 'Давай сыграем в крестики-нолики!',
                     url: url
+                }).then(() => {
+                    statusElement.innerHTML = '<div class="status-content"><div class="status-icon">✅</div><div class="status-text">Ссылка отправлена!</div></div>';
+
+                    setTimeout(() => {
+                        updateStatus();
+                    }, 2000);
                 }).catch(error => {
                     console.error('Ошибка при попытке поделиться:', error);
                     // Если Web Share API не сработал, пробуем скопировать в буфер обмена
