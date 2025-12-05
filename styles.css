@@ -81,8 +81,8 @@ h1 {
     grid-template-rows: repeat(3, 1fr);
     gap: 8px;
     margin: 30px auto;
-    max-width: 300px;
-    aspect-ratio: 1;
+    width: fit-content;
+    max-width: 90vw;
 }
 
 .cell {
@@ -92,11 +92,13 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 48px;
+    font-size: 28px;
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
+    min-width: 40px;
+    min-height: 40px;
 }
 
 .cell::before {
