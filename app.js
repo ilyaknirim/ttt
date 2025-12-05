@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let myPlayerNumber = 1;
     let boardWidth = 3;
     let boardHeight = 3;
+    let gameId = null;
+    let gameRef = null;
 
     // Инициализация Telegram Web App
     if (window.Telegram && window.Telegram.WebApp) {
@@ -43,31 +45,63 @@ document.addEventListener('DOMContentLoaded', () => {
         heightValue.textContent = boardHeight;
     });
 
+    // Функция для настройки слушателя Firebase
+    function setupFirebaseListener() {
+        if (!gameId) return;
+        gameRef = window.firebaseRef(window.firebaseDatabase, 'games/' + gameId);
+        window.firebaseOnValue(gameRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                board = data.board.split('');
+                currentPlayer = data.currentPlayer;
+                gameActive = data.gameActive;
+                boardWidth = data.boardWidth || 3;
+                boardHeight = data.boardHeight || 3;
+                renderBoard();
+                updateStatus();
+            }
+        });
+    }
+
+    // Функция для отправки состояния игры в Firebase
+    function pushGameState() {
+        if (!gameRef) return;
+        window.firebaseSet(gameRef, {
+            board: board.join(''),
+            currentPlayer: currentPlayer,
+            gameActive: gameActive,
+            boardWidth: boardWidth,
+            boardHeight: boardHeight
+        });
+    }
+
     // Начало игры
     startGameBtn.addEventListener('click', () => {
         sizeSelector.classList.add('hidden');
         gameContainer.classList.remove('hidden');
         initBoard();
         updateStatus();
+        if (!gameId) {
+            gameId = 'game_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            myPlayer = 'X';
+            setupFirebaseListener();
+            pushGameState();
+        }
     });
 
     // Загрузка состояния из URL
     function loadGameFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
-        const boardParam = urlParams.get('board');
+        const gameIdParam = urlParams.get('gameId');
         const playerParam = urlParams.get('player');
 
-        if (boardParam) {
-            board = boardParam.split('');
-        }
-        if (playerParam) {
-            currentPlayer = playerParam;
-            myPlayer = playerParam; // Second player
+        if (gameIdParam) {
+            gameId = gameIdParam;
+            myPlayer = playerParam || 'X';
+            setupFirebaseListener();
         } else {
-            myPlayer = 'X'; // First player
+            myPlayer = 'X';
         }
-        renderBoard();
-        updateStatus();
         updateStatsDisplay();
     }
 
@@ -89,6 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Рендер доски
     function renderBoard() {
+        boardElement.style.gridTemplateColumns = `repeat(${boardWidth}, 1fr)`;
+        boardElement.style.gridTemplateRows = `repeat(${boardHeight}, 1fr)`;
         boardElement.innerHTML = '';
         board.forEach((cell, index) => {
             const cellElement = document.createElement('div');
@@ -159,16 +195,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         renderBoard();
         updateStatus();
-        saveGameToURL();
+        pushGameState();
     }
 
     // Проверка победителя
     function checkWinner() {
-        const winPatterns = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8],
-            [0, 3, 6], [1, 4, 7], [2, 5, 8],
-            [0, 4, 8], [2, 4, 6]
-        ];
+        const winPatterns = [];
+
+        // Rows
+        for (let i = 0; i < boardHeight; i++) {
+            for (let j = 0; j <= boardWidth - 3; j++) {
+                winPatterns.push([i * boardWidth + j, i * boardWidth + j + 1, i * boardWidth + j + 2]);
+            }
+        }
+
+        // Columns
+        for (let j = 0; j < boardWidth; j++) {
+            for (let i = 0; i <= boardHeight - 3; i++) {
+                winPatterns.push([i * boardWidth + j, (i + 1) * boardWidth + j, (i + 2) * boardWidth + j]);
+            }
+        }
+
+        // Main diagonals
+        for (let i = 0; i <= boardHeight - 3; i++) {
+            for (let j = 0; j <= boardWidth - 3; j++) {
+                winPatterns.push([i * boardWidth + j, (i + 1) * boardWidth + j + 1, (i + 2) * boardWidth + j + 2]);
+            }
+        }
+
+        // Anti-diagonals
+        for (let i = 0; i <= boardHeight - 3; i++) {
+            for (let j = 2; j < boardWidth; j++) {
+                winPatterns.push([i * boardWidth + j, (i + 1) * boardWidth + j - 1, (i + 2) * boardWidth + j - 2]);
+            }
+        }
 
         for (const pattern of winPatterns) {
             const [a, b, c] = pattern;
@@ -187,11 +247,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Поделиться игрой
     shareBtn.addEventListener('click', () => {
         const shareUrl = new URL(window.location);
-        if (!shareUrl.searchParams.has('player')) {
-            shareUrl.searchParams.set('player', 'O');
-        } else {
-            shareUrl.searchParams.set('player', currentPlayer);
-        }
+        shareUrl.searchParams.set('gameId', gameId);
+        shareUrl.searchParams.set('player', myPlayer === 'X' ? 'O' : 'X');
         const url = shareUrl.href;
         if (navigator.share) {
             navigator.share({
@@ -213,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gameActive = true;
         renderBoard();
         updateStatus();
-        saveGameToURL();
+        pushGameState();
     });
 
     loadGameFromURL();
