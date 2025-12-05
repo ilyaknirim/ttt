@@ -4,8 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const statsElement = document.getElementById('stats');
     const shareBtn = document.getElementById('shareBtn');
     const newGameBtn = document.getElementById('newGameBtn');
+    const widthSlider = document.getElementById('widthSlider');
+    const heightSlider = document.getElementById('heightSlider');
+    const widthValue = document.getElementById('widthValue');
+    const heightValue = document.getElementById('heightValue');
+    const startGameBtn = document.getElementById('startGameBtn');
+    const sizeSelector = document.getElementById('sizeSelector');
+    const gameContainer = document.getElementById('gameContainer');
 
-    let board = ['', '', '', '', '', '', '', '', ''];
+    let board = [];
     let currentPlayer = 'X';
     let myPlayer = 'X'; // Default to X, will be set based on URL
     let gameActive = true;
@@ -16,12 +23,33 @@ document.addEventListener('DOMContentLoaded', () => {
         player2Color = '#' + Math.floor(Math.random()*16777215).toString(16);
     }
     let myPlayerNumber = 1;
+    let boardWidth = 3;
+    let boardHeight = 3;
 
     // Инициализация Telegram Web App
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
     }
+
+    // Обработчики для слайдеров
+    widthSlider.addEventListener('input', () => {
+        boardWidth = parseInt(widthSlider.value);
+        widthValue.textContent = boardWidth;
+    });
+
+    heightSlider.addEventListener('input', () => {
+        boardHeight = parseInt(heightSlider.value);
+        heightValue.textContent = boardHeight;
+    });
+
+    // Начало игры
+    startGameBtn.addEventListener('click', () => {
+        sizeSelector.classList.add('hidden');
+        gameContainer.classList.remove('hidden');
+        initBoard();
+        updateStatus();
+    });
 
     // Загрузка состояния из URL
     function loadGameFromURL() {
@@ -49,6 +77,14 @@ document.addEventListener('DOMContentLoaded', () => {
         url.searchParams.set('board', board.join(''));
         url.searchParams.set('player', currentPlayer);
         window.history.replaceState(null, null, url);
+    }
+
+    // Инициализация доски
+    function initBoard() {
+        board = new Array(boardWidth * boardHeight).fill('');
+        boardElement.style.gridTemplateColumns = `repeat(${boardWidth}, 1fr)`;
+        boardElement.style.gridTemplateRows = `repeat(${boardHeight}, 1fr)`;
+        renderBoard();
     }
 
     // Рендер доски
@@ -172,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Новая игра
     newGameBtn.addEventListener('click', () => {
-        board = ['', '', '', '', '', '', '', '', ''];
+        board = new Array(boardWidth * boardHeight).fill('');
         currentPlayer = 'X';
         gameActive = true;
         renderBoard();

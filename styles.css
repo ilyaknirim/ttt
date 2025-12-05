@@ -180,6 +180,70 @@ button:hover {
     transform: translateY(-2px);
 }
 
+.size-selector {
+    margin: 30px 0;
+}
+
+.size-selector h2 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    text-shadow: 0 0 5px var(--primary-color);
+}
+
+.slider-container {
+    margin: 20px 0;
+    text-align: left;
+}
+
+.slider-container label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    outline: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+input[type="range"]:hover {
+    opacity: 1;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--accent-color);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--accent-color);
+    border: none;
+}
+
+.hidden {
+    display: none;
+}
+
 @media (max-width: 600px) {
     #app {
         padding: 20px;
@@ -206,5 +270,13 @@ button:hover {
     button {
         padding: 10px 20px;
         font-size: 12px;
+    }
+
+    .size-selector h2 {
+        font-size: 1.2em;
+    }
+
+    .slider-container {
+        margin: 15px 0;
     }
 }

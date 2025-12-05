@@ -11,7 +11,19 @@
     <div id="app">
         <h1>Крестики-Нолики</h1>
         <div id="stats">Побед: 0 | Поражений: 0 | Ничьих: 0</div>
-        <div id="game">
+        <div id="sizeSelector" class="size-selector">
+            <h2>Выберите размер поля</h2>
+            <div class="slider-container">
+                <label for="widthSlider">Ширина: <span id="widthValue">3</span></label>
+                <input type="range" id="widthSlider" min="3" max="10" value="3">
+            </div>
+            <div class="slider-container">
+                <label for="heightSlider">Высота: <span id="heightValue">3</span></label>
+                <input type="range" id="heightSlider" min="3" max="10" value="3">
+            </div>
+            <button id="startGameBtn">Начать игру</button>
+        </div>
+        <div id="game" class="hidden">
             <div id="board" class="board">
                 <div class="cell" data-index="0"></div>
                 <div class="cell" data-index="1"></div>
@@ -26,6 +38,7 @@
             <div id="status">Ваш ход: X</div>
             <button id="shareBtn">Поделиться игрой</button>
             <button id="newGameBtn">Новая игра</button>
+        </div>
         </div>
     </div>
     <script src="app.js"></script>
