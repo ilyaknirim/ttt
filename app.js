@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const boardElement = document.getElementById('board');
     const statusElement = document.getElementById('status');
+    const statsElement = document.getElementById('stats');
     const shareBtn = document.getElementById('shareBtn');
     const newGameBtn = document.getElementById('newGameBtn');
 
@@ -8,6 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentPlayer = 'X';
     let myPlayer = 'X'; // Default to X, will be set based on URL
     let gameActive = true;
+    let stats = JSON.parse(localStorage.getItem('ticTacToeStats')) || { wins: 0, losses: 0, draws: 0 };
+    let player1Color = '#' + Math.floor(Math.random()*16777215).toString(16);
+    let player2Color = '#' + Math.floor(Math.random()*16777215).toString(16);
+    while (player1Color === player2Color) {
+        player2Color = '#' + Math.floor(Math.random()*16777215).toString(16);
+    }
+    let myPlayerNumber = 1;
 
     // Инициализация Telegram Web App
     if (window.Telegram && window.Telegram.WebApp) {
@@ -32,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         renderBoard();
         updateStatus();
+        updateStatsDisplay();
     }
 
     // Сохранение состояния в URL
@@ -48,7 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
         board.forEach((cell, index) => {
             const cellElement = document.createElement('div');
             cellElement.classList.add('cell');
-            cellElement.textContent = cell;
+            if (cell === 'X') {
+                cellElement.style.backgroundColor = player1Color;
+            } else if (cell === 'O') {
+                cellElement.style.backgroundColor = player2Color;
+            }
             cellElement.dataset.index = index;
             cellElement.addEventListener('click', handleCellClick);
             boardElement.appendChild(cellElement);
@@ -58,12 +71,38 @@ document.addEventListener('DOMContentLoaded', () => {
     // Обновление статуса
     function updateStatus() {
         if (!gameActive) {
-            statusElement.textContent = `Игра окончена. ${checkWinner()}`;
+            const winner = checkWinner();
+            if (winner === 'Ничья!') {
+                statusElement.innerHTML = `Игра окончена. Ничья!`;
+            } else {
+                const color = winner.split(' ')[0] === 'X' ? player1Color : player2Color;
+                statusElement.innerHTML = `Игра окончена. <span style="display:inline-block;width:20px;height:20px;background-color:${color};border:1px solid #000;"></span> победил!`;
+            }
         } else if (currentPlayer === myPlayer) {
-            statusElement.textContent = `Ваш ход: ${currentPlayer}`;
+            const color = currentPlayer === 'X' ? player1Color : player2Color;
+            statusElement.innerHTML = `Ваш ход: <span style="display:inline-block;width:20px;height:20px;background-color:${color};border:1px solid #000;"></span>`;
         } else {
-            statusElement.textContent = `Ожидание хода противника: ${currentPlayer}`;
+            const color = currentPlayer === 'X' ? player1Color : player2Color;
+            statusElement.innerHTML = `Ожидание хода противника: <span style="display:inline-block;width:20px;height:20px;background-color:${color};border:1px solid #000;"></span>`;
         }
+    }
+
+    // Обновление отображения статистики
+    function updateStatsDisplay() {
+        statsElement.textContent = `Побед: ${stats.wins} | Поражений: ${stats.losses} | Ничьих: ${stats.draws}`;
+    }
+
+    // Обновление статистики
+    function updateStats(winner) {
+        if (winner === myPlayer) {
+            stats.wins++;
+        } else if (winner && winner !== myPlayer) {
+            stats.losses++;
+        } else if (winner === 'Ничья!') {
+            stats.draws++;
+        }
+        localStorage.setItem('ticTacToeStats', JSON.stringify(stats));
+        updateStatsDisplay();
     }
 
     // Обработка клика по клетке
@@ -72,10 +111,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (board[index] !== '' || !gameActive || currentPlayer !== myPlayer) return;
 
         board[index] = currentPlayer;
-        if (checkWinner()) {
+        let winner = checkWinner();
+        if (winner) {
             gameActive = false;
+            updateStats(winner.split(' ')[0]); // 'X' or 'O' or 'Ничья!'
         } else if (board.every(cell => cell !== '')) {
             gameActive = false;
+            updateStats('Ничья!');
         } else {
             currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
         }
