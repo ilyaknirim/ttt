@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let board = ['', '', '', '', '', '', '', '', ''];
     let currentPlayer = 'X';
+    let myPlayer = 'X'; // Default to X, will be set based on URL
     let gameActive = true;
 
     // Инициализация Telegram Web App
@@ -25,6 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (playerParam) {
             currentPlayer = playerParam;
+            myPlayer = playerParam; // Second player
+        } else {
+            myPlayer = 'X'; // First player
         }
         renderBoard();
         updateStatus();
@@ -55,15 +59,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateStatus() {
         if (!gameActive) {
             statusElement.textContent = `Игра окончена. ${checkWinner()}`;
-        } else {
+        } else if (currentPlayer === myPlayer) {
             statusElement.textContent = `Ваш ход: ${currentPlayer}`;
+        } else {
+            statusElement.textContent = `Ожидание хода противника: ${currentPlayer}`;
         }
     }
 
     // Обработка клика по клетке
     function handleCellClick(event) {
         const index = event.target.dataset.index;
-        if (board[index] !== '' || !gameActive) return;
+        if (board[index] !== '' || !gameActive || currentPlayer !== myPlayer) return;
 
         board[index] = currentPlayer;
         if (checkWinner()) {
@@ -102,7 +108,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Поделиться игрой
     shareBtn.addEventListener('click', () => {
-        const url = window.location.href;
+        const shareUrl = new URL(window.location);
+        if (!shareUrl.searchParams.has('player')) {
+            shareUrl.searchParams.set('player', 'O');
+        } else {
+            shareUrl.searchParams.set('player', currentPlayer);
+        }
+        const url = shareUrl.href;
         if (navigator.share) {
             navigator.share({
                 title: 'Крестики-Нолики',
