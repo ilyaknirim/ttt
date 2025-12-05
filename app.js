@@ -79,14 +79,15 @@ document.addEventListener('DOMContentLoaded', () => {
     startGameBtn.addEventListener('click', () => {
         sizeSelector.classList.add('hidden');
         gameContainer.classList.remove('hidden');
-        initBoard();
-        updateStatus();
         if (!gameId) {
+            initBoard();
+            updateStatus();
             gameId = 'game_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             myPlayer = 'X';
             setupFirebaseListener();
             pushGameState();
         }
+        // For existing game, Firebase listener will handle loading and rendering
     });
 
     // Загрузка состояния из URL
