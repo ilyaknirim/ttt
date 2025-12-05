@@ -1,86 +1,96 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Крестики-Нолики в Telegram</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css" />
     <!-- Подключение Telegram Web App API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Подключение Firebase для синхронизации игры между игроками -->
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import {
+        getDatabase,
+        ref,
+        set,
+        onValue,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-        // Конфигурация Firebase (замените на свои данные)
-        // Для получения этих данных:
-        // 1. Создайте проект в Firebase Console (https://console.firebase.google.com/)
-        // 2. Добавьте веб-приложение в проект
-        // 3. Скопируйте конфигурацию из настроек проекта
-        const firebaseConfig = {
-            apiKey: "your-api-key",
-            authDomain: "your-project.firebaseapp.com",
-            databaseURL: "https://your-project-default-rtdb.firebaseio.com",
-            projectId: "your-project",
-            storageBucket: "your-project.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "your-app-id"
-        };
+      // Конфигурация Firebase (замените на свои данные)
+      // Для получения этих данных:
+      // 1. Создайте проект в Firebase Console (https://console.firebase.google.com/)
+      // 2. Добавьте веб-приложение в проект
+      // 3. Скопируйте конфигурацию из настроек проекта
+      const firebaseConfig = {
+        apiKey: "AIzaSyB0VaTwU2nJDAqHp7KGEdEVLaPsrFfFWEM",
+        authDomain: "tictac-a477c.firebaseapp.com",
+        projectId: "tictac-a477c",
+        storageBucket: "tictac-a477c.firebasestorage.app",
+        messagingSenderId: "686237847694",
+        appId: "1:686237847694:web:e331abae88a136cb7939df",
+        measurementId: "G-YXY1P1DMWE",
+        
+      };
 
-        // Инициализация Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+      // Инициализация Firebase
+      const app = initializeApp(firebaseConfig);
+      const database = getDatabase(app);
 
-        // Сохранение экземпляров Firebase в глобальных переменных для доступа из app.js
-        window.firebaseApp = app;
-        window.firebaseDatabase = database;
-        window.firebaseRef = ref;
-        window.firebaseSet = set;
-        window.firebaseOnValue = onValue;
+      // Сохранение экземпляров Firebase в глобальных переменных для доступа из app.js
+      window.firebaseApp = app;
+      window.firebaseDatabase = database;
+      window.firebaseRef = ref;
+      window.firebaseSet = set;
+      window.firebaseOnValue = onValue;
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <!-- Основной контейнер приложения -->
     <div id="app">
-        <!-- Заголовок игры -->
-        <h1>Крестики-Нолики</h1>
+      <!-- Заголовок игры -->
+      <h1>Крестики-Нолики</h1>
 
-        <!-- Статистика игрока -->
-        <div id="stats">Побед: 0 | Поражений: 0 | Ничьих: 0</div>
+      <!-- Статистика игрока -->
+      <div id="stats">Побед: 0 | Поражений: 0 | Ничьих: 0</div>
 
-        <!-- Селектор размера поля (отображается при старте) -->
-        <div id="sizeSelector" class="size-selector">
-            <h2>Выберите размер поля</h2>
-            <div class="slider-container">
-                <label for="widthSlider">Ширина: <span id="widthValue">3</span></label>
-                <input type="range" id="widthSlider" min="3" max="10" value="3">
-            </div>
-            <div class="slider-container">
-                <label for="heightSlider">Высота: <span id="heightValue">3</span></label>
-                <input type="range" id="heightSlider" min="3" max="10" value="3">
-            </div>
-            <button id="startGameBtn">Начать игру</button>
+      <!-- Селектор размера поля (отображается при старте) -->
+      <div id="sizeSelector" class="size-selector">
+        <h2>Выберите размер поля</h2>
+        <div class="slider-container">
+          <label for="widthSlider"
+            >Ширина: <span id="widthValue">3</span></label
+          >
+          <input type="range" id="widthSlider" min="3" max="10" value="3" />
+        </div>
+        <div class="slider-container">
+          <label for="heightSlider"
+            >Высота: <span id="heightValue">3</span></label
+          >
+          <input type="range" id="heightSlider" min="3" max="10" value="3" />
+        </div>
+        <button id="startGameBtn">Начать игру</button>
+      </div>
+
+      <!-- Контейнер с игровым полем (изначально скрыт) -->
+      <div id="gameContainer" class="hidden">
+        <!-- Игровое поле - ячейки будут генерироваться динамически в JS -->
+        <div id="board" class="board">
+          <!-- Ячейки поля будут добавлены через JavaScript в зависимости от выбранного размера -->
         </div>
 
-        <!-- Контейнер с игровым полем (изначально скрыт) -->
-        <div id="gameContainer" class="hidden">
-            <!-- Игровое поле - ячейки будут генерироваться динамически в JS -->
-            <div id="board" class="board">
-                <!-- Ячейки поля будут добавлены через JavaScript в зависимости от выбранного размера -->
-            </div>
+        <!-- Информационное сообщение о статусе игры -->
+        <div id="status">Ваш ход: X</div>
 
-            <!-- Информационное сообщение о статусе игры -->
-            <div id="status">Ваш ход: X</div>
-
-            <!-- Кнопки управления игрой -->
-            <div class="game-controls">
-                <button id="shareBtn">Поделиться игрой</button>
-                <button id="newGameBtn">Новая игра</button>
-            </div>
+        <!-- Кнопки управления игрой -->
+        <div class="game-controls">
+          <button id="shareBtn">Поделиться игрой</button>
+          <button id="newGameBtn">Новая игра</button>
         </div>
+      </div>
     </div>
 
     <!-- Подключение основного скрипта игры -->
     <script src="app.js"></script>
-</body>
+  </body>
 </html>
